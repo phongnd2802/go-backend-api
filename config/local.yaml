@@ -1,0 +1,31 @@
+server:
+  host: 127.0.0.1
+  port: 8000
+  mode: "dev"
+
+mysql:
+  host: 127.0.0.1
+  port: 3301
+  user: root
+  pass: 12345
+  db: eCommerce
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_life: 3600
+
+redis:
+  host: 127.0.0.1
+  port: 6380
+  pool_size: 10
+
+logger:
+  log_level: debug
+  log_file: "./storages/logs/dev.log"
+  max_size: 500
+  max_backups: 3
+  max_age: 30
+  compress: true
+
+jwt:
+  exp_access_token: 2
+  exp_refresh_token: 168
