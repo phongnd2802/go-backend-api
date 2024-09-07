@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+type ApiKey struct {
+	ID          int32
+	ApiKey      string
+	Description sql.NullString
+	IsActive    bool
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type Role struct {
 	ID       int32
 	RoleName string

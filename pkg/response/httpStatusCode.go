@@ -1,9 +1,9 @@
 package response
 
 const (
-	SuccessOK = 2000
-	CreatedOK = 2001
-
+	SuccessOK                     = 2000
+	CreatedOK                     = 2001
+	ErrCodeForbidden              = 4003
 	ErrCodeInvalidParams          = 4010
 	ErrCodeNotFound               = 4004
 	ErrCodeShopExist              = 4011
@@ -18,6 +18,10 @@ const (
 	ErrCodeEmailNoActive          = 4019
 	ErrCodeInsertToken            = 4020
 	ErrCodeOTPExisting            = 4021
+	ErrCodeSendEmailFailed        = 4022
+	ErrCodeInvalidHeaderParam     = 4023
+	ErrCodeInvalidUserID          = 4024
+	ErrCodeTokenInvalid           = 4025
 )
 
 var msg = map[int]string{
@@ -38,4 +42,9 @@ var msg = map[int]string{
 	ErrCodeEmailNoActive:          "email no active",
 	ErrCodeInsertToken:            "insert token error",
 	ErrCodeOTPExisting:            "otp existing...",
+	ErrCodeForbidden:              "forbidden error",
+	ErrCodeSendEmailFailed:        "send email error",
+	ErrCodeInvalidHeaderParam:     "invalid header params",
+	ErrCodeInvalidUserID:          "invalid client id",
+	ErrCodeTokenInvalid:           "invalid token",
 }

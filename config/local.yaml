@@ -29,3 +29,9 @@ logger:
 jwt:
   exp_access_token: 2
   exp_refresh_token: 168
+
+smtp:
+  username: example@gmail.com
+  password: secretKey
+  host: smtp.gmail.com
+  port: 587

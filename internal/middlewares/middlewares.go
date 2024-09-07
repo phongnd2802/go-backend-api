@@ -1,16 +1,17 @@
 package middlewares
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/phongnd2802/go-backend-api/internal/repositories"
+)
 
-type IMiddleware interface {
-	ApiKey() gin.HandlerFunc
-	Authentication() gin.HandlerFunc
-	PermissionCheck() gin.HandlerFunc
-	CorsMiddleware() gin.HandlerFunc
+type Middleware struct{
+	tokenRepo repositories.ITokenRepository
+	authRepo repositories.IAuthRepository
 }
 
-type middleware struct{}
-
-func New() IMiddleware {
-	return &middleware{}
+func NewMiddleware(authRepo repositories.IAuthRepository, tokenRepo repositories.ITokenRepository) *Middleware {
+	return &Middleware{
+		authRepo: authRepo,
+		tokenRepo: tokenRepo,
+	}
 }
