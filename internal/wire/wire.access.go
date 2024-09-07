@@ -19,3 +19,4 @@ func InitAccessRouterHandler() (*controllers.AccessController, error) {
 	)
 	return &controllers.AccessController{}, nil
 }
+

@@ -51,3 +51,19 @@ func VerifyToken(tokenString string, publicKeyPEM string) (*jwt.Token, error) {
 
 	return token, nil
 }
+
+func GetUserIDFromToken(token *jwt.Token) (string, error) {
+	// Truy cập claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// Lấy payload, bạn có thể tìm "id" hoặc các trường khác từ payload
+		if payload, ok := claims["sub"].(map[string]interface{}); ok {
+			if userID, ok := payload["id"].(string); ok {
+				return userID, nil
+			}
+			return "", fmt.Errorf("id not found in token claims")
+		}
+		return "", fmt.Errorf("invalid payload format")
+	}
+
+	return "", fmt.Errorf("invalid token claims")
+}
