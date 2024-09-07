@@ -19,6 +19,9 @@ const (
 	ErrCodeInsertToken            = 4020
 	ErrCodeOTPExisting            = 4021
 	ErrCodeSendEmailFailed        = 4022
+	ErrCodeInvalidHeaderParam     = 4023
+	ErrCodeInvalidUserID          = 4024
+	ErrCodeTokenInvalid           = 4025
 )
 
 var msg = map[int]string{
@@ -41,4 +44,7 @@ var msg = map[int]string{
 	ErrCodeOTPExisting:            "otp existing...",
 	ErrCodeForbidden:              "forbidden error",
 	ErrCodeSendEmailFailed:        "send email error",
+	ErrCodeInvalidHeaderParam:     "invalid header params",
+	ErrCodeInvalidUserID:          "invalid client id",
+	ErrCodeTokenInvalid:           "invalid token",
 }

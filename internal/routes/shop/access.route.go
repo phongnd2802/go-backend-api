@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/phongnd2802/go-backend-api/internal/middlewares"
 	"github.com/phongnd2802/go-backend-api/internal/wire"
+	"github.com/phongnd2802/go-backend-api/pkg/response"
 )
 
 type AccessRoute struct{}
@@ -22,8 +23,12 @@ func (ac *AccessRoute) InitAccessRoute(Route *gin.RouterGroup, middleware *middl
 
 	// Private Route
 	accessPrivateRouter := Route.Group("/shop")
+	accessPrivateRouter.Use(middleware.Authentication())
 	//Route.Use() //Authentication
 	{
-		accessPrivateRouter.GET("/profile")
+		accessPrivateRouter.GET("/profile", func(ctx *gin.Context) {
+			response.SuccessResponse(ctx, 2000, "OK")
+		})
+		accessPrivateRouter.POST("/logout")
 	}
 }

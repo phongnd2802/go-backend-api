@@ -10,6 +10,7 @@ import (
 
 func InitMiddlewareHandler() (*middlewares.Middleware, error) {
 	wire.Build(
+		repositories.NewTokenRepository,
 		repositories.NewAuthRepository,
 		middlewares.NewMiddleware,
 	)

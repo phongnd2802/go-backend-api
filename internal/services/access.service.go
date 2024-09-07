@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-
 	"github.com/google/uuid"
 	"github.com/phongnd2802/go-backend-api/global"
 	"github.com/phongnd2802/go-backend-api/internal/repositories"
@@ -24,8 +23,8 @@ const (
 
 const (
 	ADMIN = 1
-	SHOP = 2
-	USER = 3
+	SHOP  = 2
+	USER  = 3
 )
 
 type IAccessService interface {
@@ -34,12 +33,20 @@ type IAccessService interface {
 	VerifyOTP(email string, otp int, purpose int) (*vo.ShopLoginResponse, int)
 	SendOTP(email string) int
 	ResetPassword(email, newPassword string) int
+	LogOut(tokenId string) int
 }
 
 type accessService struct {
 	otpRepo   repositories.IOTPRepository
 	shopRepo  repositories.IShopRepository
 	tokenRepo repositories.ITokenRepository
+}
+
+// LogOut implements IAccessService.
+func (ac *accessService) LogOut(tokenId string) int {
+	
+
+	return response.SuccessOK
 }
 
 // ResetPassword implements IAccessService.
@@ -160,12 +167,17 @@ func (ac *accessService) VerifyOTP(email string, otp int, purpose int) (*vo.Shop
 		accessToken, _ := jwt.GenerateToken(payload, privateKeyStr, global.Config.JWT.ExpirationTimeAccessToken)
 		refreshToken, _ := jwt.GenerateToken(payload, privateKeyStr, global.Config.JWT.ExpirationTimeRefreshToken)
 
+
 		// Save infor token to DB
 		tokenId := uuid.New().String()
 		err = ac.tokenRepo.CreateToken(tokenId, publicKeyStr, refreshToken, foundShop.ID)
 		if err != nil {
 			return nil, response.ErrCodeInsertToken
 		}
+
+		// Save AccessToken To Redis
+		hashShopID := crypto.GetHash(foundShop.ID)
+		_ = ac.tokenRepo.SetAccessToken(accessToken, hashShopID, int64(global.Config.JWT.ExpirationTimeAccessToken * int(time.Hour)))
 
 		// Response
 		return &vo.ShopLoginResponse{
@@ -210,7 +222,6 @@ func (ac *accessService) SignUp(name, email, password string) (*vo.ShopRegisterR
 		global.Logger.Error("Failed to create shop", zap.Error(err))
 		return nil, response.ErrCodeCreateShop
 	}
-
 
 	// Generate OTP
 	otp := random.GenerateSixDigitOtp()
@@ -268,6 +279,10 @@ func (ac *accessService) SignIn(email, password string) (*vo.ShopLoginResponse, 
 	if err != nil {
 		return nil, response.ErrCodeInsertToken
 	}
+
+	// Save AccessToken To Redis
+	hashShopID := crypto.GetHash(foundShop.ID)
+	_ = ac.tokenRepo.SetAccessToken(accessToken, hashShopID, int64(global.Config.JWT.ExpirationTimeAccessToken * int(time.Hour)))
 
 	return &vo.ShopLoginResponse{
 		ShopRegisterResponse: vo.ShopRegisterResponse{

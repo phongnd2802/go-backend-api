@@ -14,17 +14,6 @@ type AccessController struct {
 	accessService services.IAccessService
 }
 
-func (ac *AccessController) AdminLogin(c *gin.Context) {
-	var body dto.AdminLoginRequest
-	if err := c.ShouldBindJSON(&body); err != nil {
-		response.ErrorResponse(c, response.ErrCodeInvalidParams, err)
-		return
-	}
-
-	
-}
-
-
 
 func (ac *AccessController) ResetPassword(c *gin.Context) {
 	var body dto.ShopLoginRequest

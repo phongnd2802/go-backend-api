@@ -24,7 +24,7 @@ func initRoute() *gin.Engine {
 	middleware, _ := wire.InitMiddlewareHandler()
 	r.Use(middleware.CorsMiddleware())
 	r.Use(middleware.LoggerWrite())
-	//r.Use(middleware.ApiKey())
+	r.Use(middleware.ApiKey())
 	// Routes
 	adminRoute := routes.RouteApp.Admin
 	shopRoute := routes.RouteApp.Shop

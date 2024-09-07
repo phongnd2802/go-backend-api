@@ -28,6 +28,7 @@ func InitAccessRouterHandler() (*controllers.AccessController, error) {
 
 func InitMiddlewareHandler() (*middlewares.Middleware, error) {
 	iAuthRepository := repositories.NewAuthRepository()
-	middleware := middlewares.NewMiddleware(iAuthRepository)
+	iTokenRepository := repositories.NewTokenRepository()
+	middleware := middlewares.NewMiddleware(iAuthRepository, iTokenRepository)
 	return middleware, nil
 }
