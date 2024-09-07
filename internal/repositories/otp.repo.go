@@ -12,10 +12,10 @@ type IOTPRepository interface {
 	GetOTP(email string) int
 	DeleteOTP(email string) error
 
-	SetOTPCount(email string, otp int, count int, expirationTime int64) error
 	GetOTPCount(email string, otp int) int
 	GetTTLOTPCount(email string, otp int) int
 	DeleteOTPCount(email string, otp int) error
+	AddOTPCount(email string, otp int, expirationTime int64) error
 
 	AddOTPSetPassWord(email string, expirationTime int64) error
 	GetOTPSetPassWord(email string) int
@@ -24,18 +24,27 @@ type IOTPRepository interface {
 
 type otpRepository struct{}
 
-func (a *otpRepository) DeleteOTPSetPassword(email string) error {
-	key := fmt.Sprintf("shop:%s:password", email)
-	return global.Rdb.Del(ctx, key).Err()
+// AddOTPCount implements IOTPRepository.
+func (a *otpRepository) AddOTPCount(email string, otp int, expirationTime int64) error {
+	tx := global.Rdb.TxPipeline()
+	key := fmt.Sprintf("shop:%s:%d", email, otp)
+	tx.Incr(ctx, key)
+	tx.Expire(ctx, key, time.Duration(expirationTime))
+	_, err := tx.Exec(ctx)
+	return err
 }
 
+func (a *otpRepository) DeleteOTPSetPassword(email string) error {
+	key := fmt.Sprintf("shop:%s:password", email)
+
+	return global.Rdb.Del(ctx, key).Err()
+}
 
 // AddOTPSetPassWord implements IOTPRepository.
 func (a *otpRepository) AddOTPSetPassWord(email string, expirationTime int64) error {
 	key := fmt.Sprintf("shop:%s:password", email)
 	return global.Rdb.SetEx(ctx, key, 1, time.Duration(expirationTime)).Err()
 }
-
 
 // GetOTPSetPassWord implements IOTPRepository.
 func (a *otpRepository) GetOTPSetPassWord(email string) int {
@@ -72,10 +81,6 @@ func (a *otpRepository) GetOTPCount(email string, otp int) int {
 	return countInt
 }
 
-func (a *otpRepository) SetOTPCount(email string, otp int, count int, expirationTime int64) error {
-	key := fmt.Sprintf("shop:%s:%d", email, otp)
-	return global.Rdb.SetEx(ctx, key, count, time.Duration(expirationTime)).Err()
-}
 
 func (a *otpRepository) DeleteOTP(email string) error {
 	key := fmt.Sprintf("shop:%s:otp", email)

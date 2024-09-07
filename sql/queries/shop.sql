@@ -11,3 +11,10 @@ UPDATE shops SET is_active = 1 WHERE shop_email = ?;
 
 -- name: UpdatePassword :exec
 UPDATE shops SET shop_password = ? WHERE shop_email = ?;
+
+-- name: GetRoleByID :one
+SELECT role_name FROM roles 
+WHERE id = (SELECT role_id FROM shop_roles WHERE shop_id = ?);
+
+-- name: InsertRole :exec
+INSERT INTO shop_roles (shop_id, role_id) VALUES (?, ?);

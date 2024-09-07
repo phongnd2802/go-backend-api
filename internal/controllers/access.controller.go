@@ -2,16 +2,29 @@ package controllers
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/phongnd2802/go-backend-api/internal/dto"
 	"github.com/phongnd2802/go-backend-api/internal/services"
 	"github.com/phongnd2802/go-backend-api/pkg/response"
-	"strconv"
 )
 
 type AccessController struct {
 	accessService services.IAccessService
 }
+
+func (ac *AccessController) AdminLogin(c *gin.Context) {
+	var body dto.AdminLoginRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		response.ErrorResponse(c, response.ErrCodeInvalidParams, err)
+		return
+	}
+
+	
+}
+
+
 
 func (ac *AccessController) ResetPassword(c *gin.Context) {
 	var body dto.ShopLoginRequest

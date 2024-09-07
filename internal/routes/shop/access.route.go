@@ -8,7 +8,7 @@ import (
 
 type AccessRoute struct{}
 
-func (ac *AccessRoute) InitAccessRoute(Route *gin.RouterGroup, middleware middlewares.IMiddleware) {
+func (ac *AccessRoute) InitAccessRoute(Route *gin.RouterGroup, middleware *middlewares.Middleware) {
 	accessController, _ := wire.InitAccessRouterHandler()
 	// Public Router
 	accessPublicRouter := Route.Group("/shop")

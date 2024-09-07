@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,12 +13,19 @@ import (
 	"github.com/phongnd2802/go-backend-api/pkg/utils/crypto"
 	"github.com/phongnd2802/go-backend-api/pkg/utils/jwt"
 	"github.com/phongnd2802/go-backend-api/pkg/utils/random"
+	"github.com/phongnd2802/go-backend-api/pkg/utils/sendto"
 	"go.uber.org/zap"
 )
 
 const (
 	SIGNUP          = 0
 	FORWARDPASSWORD = 1
+)
+
+const (
+	ADMIN = 1
+	SHOP = 2
+	USER = 3
 )
 
 type IAccessService interface {
@@ -72,12 +80,15 @@ func (ac *accessService) SendOTP(email string) int {
 	fmt.Printf("otp::%d\n", otp)
 	// Save OTP in Redis with expiration time
 	err := ac.otpRepo.AddOTP(hashEmail, otp, int64(5*time.Minute))
-	_ = ac.otpRepo.SetOTPCount(hashEmail, otp, 0, int64(5*time.Minute))
-
-	// SendOTP to Email
+	_ = ac.otpRepo.AddOTPCount(hashEmail, otp, int64(5*time.Minute))
 
 	if err != nil {
 		return response.ErrCodeInvalidOtp
+	}
+	// SendOTP to Email
+	err = sendto.SendTextEmailOTP([]string{email}, "admin@gmail.com", strconv.Itoa(otp))
+	if err != nil {
+		return response.ErrCodeSendEmailFailed
 	}
 	return response.SuccessOK
 }
@@ -103,7 +114,7 @@ func (ac *accessService) VerifyOTP(email string, otp int, purpose int) (*vo.Shop
 
 	// GetOTP Count
 	otpCount := ac.otpRepo.GetOTPCount(hashEmail, otpRedis)
-	if otpCount == 5 {
+	if otpCount >= 5 {
 		_ = ac.otpRepo.DeleteOTP(hashEmail)
 		_ = ac.otpRepo.DeleteOTPCount(hashEmail, otpRedis)
 		return nil, response.ErrCodeOtpSpam
@@ -112,7 +123,7 @@ func (ac *accessService) VerifyOTP(email string, otp int, purpose int) (*vo.Shop
 	if otp != otpRedis {
 		ttl := ac.otpRepo.GetTTLOTPCount(hashEmail, otpRedis)
 		if ttl > 0 {
-			_ = ac.otpRepo.SetOTPCount(hashEmail, otpRedis, otpCount+1, int64(ttl))
+			_ = ac.otpRepo.AddOTPCount(hashEmail, otpRedis, int64(ttl))
 		}
 		return nil, response.ErrCodeInvalidOtp
 	}
@@ -194,19 +205,28 @@ func (ac *accessService) SignUp(name, email, password string) (*vo.ShopRegisterR
 		global.Logger.Error("Failed to create shop", zap.Error(err))
 		return nil, response.ErrCodeCreateShop
 	}
+	err = ac.shopRepo.InsertRole(id.String(), SHOP)
+	if err != nil {
+		global.Logger.Error("Failed to create shop", zap.Error(err))
+		return nil, response.ErrCodeCreateShop
+	}
+
 
 	// Generate OTP
 	otp := random.GenerateSixDigitOtp()
 	fmt.Printf("otp::%d\n", otp)
 	// Save OTP in Redis with expiration time
 	err = ac.otpRepo.AddOTP(hashEmail, otp, int64(5*time.Minute))
-	_ = ac.otpRepo.SetOTPCount(hashEmail, otp, 0, int64(5*time.Minute))
+	_ = ac.otpRepo.AddOTPCount(hashEmail, otp, int64(5*time.Minute))
 	if err != nil {
 		return nil, response.ErrCodeInvalidOtp
 	}
 
 	// SendOTP to Email
-
+	err = sendto.SendTextEmailOTP([]string{email}, "admin@gmail.com", strconv.Itoa(otp))
+	if err != nil {
+		return nil, response.ErrCodeSendEmailFailed
+	}
 	// Response
 	return &vo.ShopRegisterResponse{
 		ID:    id.String(),

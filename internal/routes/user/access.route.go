@@ -7,6 +7,6 @@ import (
 
 type AccessRoute struct{}
 
-func (ac *AccessRoute) InitAccessRoute(Route *gin.RouterGroup, middleware middlewares.IMiddleware) {
+func (ac *AccessRoute) InitAccessRoute(Route *gin.RouterGroup, middleware *middlewares.Middleware) {
 
 }

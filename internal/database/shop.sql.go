@@ -40,6 +40,18 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) error {
 	return err
 }
 
+const getRoleByID = `-- name: GetRoleByID :one
+SELECT role_name FROM roles 
+WHERE id = (SELECT role_id FROM shop_roles WHERE shop_id = ?)
+`
+
+func (q *Queries) GetRoleByID(ctx context.Context, shopID string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getRoleByID, shopID)
+	var role_name string
+	err := row.Scan(&role_name)
+	return role_name, err
+}
+
 const getShopByEmail = `-- name: GetShopByEmail :one
 SELECT id, shop_name, shop_email, shop_password, is_active, verify, created_at, updated_at FROM shops WHERE shop_email = ? LIMIT 1
 `
@@ -58,6 +70,20 @@ func (q *Queries) GetShopByEmail(ctx context.Context, shopEmail string) (Shop, e
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const insertRole = `-- name: InsertRole :exec
+INSERT INTO shop_roles (shop_id, role_id) VALUES (?, ?)
+`
+
+type InsertRoleParams struct {
+	ShopID string
+	RoleID int32
+}
+
+func (q *Queries) InsertRole(ctx context.Context, arg InsertRoleParams) error {
+	_, err := q.db.ExecContext(ctx, insertRole, arg.ShopID, arg.RoleID)
+	return err
 }
 
 const updatePassword = `-- name: UpdatePassword :exec

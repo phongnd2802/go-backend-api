@@ -10,16 +10,38 @@ type IShopRepository interface {
 	CreateShop(id, name, email, password string) error
 	ActiveShopOTP(email string) error
 	UpdatePassword(email string, newPassword string) error
+	GetRoleByID(shopID string) (*string, error)
+	InsertRole(shopID string, roleID int32) error
 }
 
 type shopRepository struct {
 	sqlc *database.Queries
 }
 
+// InsertRole implements IShopRepository.
+func (sr *shopRepository) InsertRole(shopID string, roleID int32) error {
+	err := sr.sqlc.InsertRole(ctx, database.InsertRoleParams{
+		ShopID: shopID,
+		RoleID: roleID,
+	})
+
+	return err
+}
+
+// GetRoleByID implements IShopRepository.
+func (sr *shopRepository) GetRoleByID(shopID string) (*string, error) {
+	role, err := sr.sqlc.GetRoleByID(ctx, shopID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
 // UpdatePassword implements IShopRepository.
 func (sr *shopRepository) UpdatePassword(email string, newPassword string) error {
 	err := sr.sqlc.UpdatePassword(ctx, database.UpdatePasswordParams{
-		ShopEmail: email,
+		ShopEmail:    email,
 		ShopPassword: newPassword,
 	})
 	if err != nil {

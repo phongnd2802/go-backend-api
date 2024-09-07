@@ -8,6 +8,7 @@ package wire
 
 import (
 	"github.com/phongnd2802/go-backend-api/internal/controllers"
+	"github.com/phongnd2802/go-backend-api/internal/middlewares"
 	"github.com/phongnd2802/go-backend-api/internal/repositories"
 	"github.com/phongnd2802/go-backend-api/internal/services"
 )
@@ -21,4 +22,12 @@ func InitAccessRouterHandler() (*controllers.AccessController, error) {
 	iAccessService := services.NewAccessService(iShopRepository, iotpRepository, iTokenRepository)
 	accessController := controllers.NewAccessController(iAccessService)
 	return accessController, nil
+}
+
+// Injectors from wire.middleware.go:
+
+func InitMiddlewareHandler() (*middlewares.Middleware, error) {
+	iAuthRepository := repositories.NewAuthRepository()
+	middleware := middlewares.NewMiddleware(iAuthRepository)
+	return middleware, nil
 }
